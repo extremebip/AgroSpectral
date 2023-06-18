@@ -2,6 +2,8 @@ import sys
 import os
 import streamlit as st
 import plotly.express as px
+import folium
+from streamlit_folium import st_folium
 
 from utilities import *
 
@@ -79,6 +81,39 @@ def linechart_tab(yield_df):
     fig.update_layout(xaxis_type='category')
     st.plotly_chart(fig)
 
+def map_tab(yield_df):
+    st.header("Produksi Padi per Kabupaten")
+
+    aggregate_df = yield_df.groupby('Regency')['Padi'].sum().reset_index()
+    aggregate_df.columns = ["Kabupaten", "Padi"]
+
+    map = folium.Map(location=(-6.9212, 107.6157), zoom_start=8, tiles="CartoDB positron")
+
+    choropleth = folium.Choropleth(
+        geo_data='data/Jabar_SHP.json',
+        data=aggregate_df,
+        columns=("Kabupaten", "Padi"),
+        key_on="feature.properties.KAB_KOTA",
+        line_opacity=0.8,
+        highlight=True,
+        # fill_color="GnBu",
+        fill_color="Greens",
+        
+    )
+    choropleth.geojson.add_to(map)
+
+    aggregate_df = aggregate_df.set_index('Kabupaten')
+    for feature in choropleth.geojson.data['features']:
+        nama_kabupaten = feature['properties']['KAB_KOTA']
+        feature['properties']['Kabupaten'] = nama_kabupaten
+        feature['properties']['Padi'] = 'Padi: ' + str(aggregate_df.loc[nama_kabupaten, 'Padi'] if nama_kabupaten in list(aggregate_df.index) else 'N/A')
+
+    choropleth.geojson.add_child(
+        folium.features.GeoJsonTooltip(['Kabupaten', 'Padi'], labels=False)
+    )
+
+    st_map = st_folium(map, width=750, height=450)
+
 def main():
     current = os.path.dirname(os.path.realpath(__file__))
     parent = os.path.dirname(current)
@@ -110,7 +145,7 @@ def main():
 
     filtered_yields = filter_yield_df(yield_df, selected_regencies, selected_years)
 
-    tab1, tab2, tab3, tab4 = st.tabs(["Tabel", "Histogram", "Bar Chart", "Line Chart"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Tabel", "Histogram", "Bar Chart", "Line Chart", "Peta"])
     with tab1:
         dataframe_tab(filtered_yields)
 
@@ -122,6 +157,9 @@ def main():
 
     with tab4:
         linechart_tab(filtered_yields)
+
+    with tab5:
+        map_tab(filtered_yields)
 
 if __name__ == "__main__":
     main()
