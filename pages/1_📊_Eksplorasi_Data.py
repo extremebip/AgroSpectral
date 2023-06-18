@@ -96,7 +96,6 @@ def map_tab(yield_df):
         key_on="feature.properties.KAB_KOTA",
         line_opacity=0.8,
         highlight=True,
-        # fill_color="GnBu",
         fill_color="Greens",
         
     )
