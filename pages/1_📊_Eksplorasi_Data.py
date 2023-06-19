@@ -3,7 +3,7 @@ import os
 import streamlit as st
 import plotly.express as px
 import folium
-from streamlit_folium import st_folium
+from streamlit_folium import folium_static
 
 from utilities import *
 
@@ -99,8 +99,9 @@ def map_tab(yield_df):
         fill_opacity=0.8,
         highlight=True,
         fill_color="Greens",
+        legend_name="Total Produksi Padi",
     )
-    choropleth.geojson.add_to(map)
+    choropleth.add_to(map)
 
     aggregate_df = aggregate_df.set_index('Kabupaten')
     for feature in choropleth.geojson.data['features']:
@@ -112,7 +113,7 @@ def map_tab(yield_df):
         folium.features.GeoJsonTooltip(['Kabupaten', 'Padi'], labels=False)
     )
 
-    st_folium(map, width=750, height=450, returned_objects=[])
+    folium_static(map, width=750, height=450)
 
 def main():
     current = os.path.dirname(os.path.realpath(__file__))

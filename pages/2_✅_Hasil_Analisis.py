@@ -4,18 +4,18 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import folium
-from streamlit_folium import st_folium
+from streamlit_folium import folium_static
 
 from utilities import *
 from gp import GaussianProcess
 
 @st.cache_data
-def get_real_pred_df(code_regency_map, real_dict, pred_dict, pred_err_dict, pred_err_p_dict):
+def get_real_pred_df(code_regency_map, real_dict, pred_dict, pred_err_dict):
     combined_dict = {k: [
-     code_regency_map[k], real_dict[k], pred_dict[k], pred_err_dict[k], pred_err_p_dict[k]
+     code_regency_map[k], real_dict[k], pred_dict[k], pred_err_dict[k]
     ] for k in real_dict }
     result_df =  pd.DataFrame.from_dict(combined_dict).transpose()
-    result_df.columns = ['Kabupaten', 'Produksi Padi', 'Prediksi', 'Error Prediksi', 'Persentase Error']
+    result_df.columns = ['Kabupaten', 'Produksi', 'Prediksi', 'Error Prediksi']
     result_df = result_df.sort_values(by='Prediksi', ascending=False)
     return result_df
 
@@ -110,18 +110,37 @@ def show_predict_map(pred_result_df, gp_result_df):
 
     tab1, tab2 = st.tabs(["Tabel", "Peta"])
 
+    yield_pred = np.concatenate((pred_result_df['Prediksi'], gp_result_df['Prediksi']))
+    pred_hist, pred_bin_edges = np.histogram(yield_pred, bins=6)
+
+    pred_err = np.concatenate((pred_result_df['Error Prediksi'], gp_result_df['Error Prediksi']))
+    err_hist, err_bin_edges = np.histogram(pred_err, bins=6)
+
     if model_to_use == 'CNN':
         yield_df = pred_result_df
     else:
         yield_df = gp_result_df
 
     with tab1:
-        st.dataframe(yield_df, use_container_width=True, hide_index=True)
+        st.dataframe(
+            yield_df,
+            column_config={
+                "Produksi": st.column_config.NumberColumn("Produksi Padi (Actual)"),
+                "Prediksi": st.column_config.NumberColumn(
+                    "Produksi Padi (Prediksi)",
+                ),
+                "Error Prediksi": st.column_config.NumberColumn(
+                    "Error Prediksi",
+                ),
+            },
+            use_container_width=True,
+            hide_index=True
+        )
 
     with tab2:
         data_to_show = st.radio(
             "Data yang ditampilkan",
-            ('Prediksi Padi', 'Error Prediksi (%)'),
+            ('Prediksi Padi', 'Error Prediksi'),
             horizontal=True,
         )
 
@@ -131,11 +150,12 @@ def show_predict_map(pred_result_df, gp_result_df):
             fill_color = "Greens"
             col_name = "Prediksi"
             tooltip_label = "Prediksi Padi: "
+            bins = pred_bin_edges.tolist()
         else:
             fill_color = "Reds"
-            col_name = "Persentase Error"
-            tooltip_label = "Error Prediksi (%): "
-            bins = np.arange(0, 1, 0.1).tolist() + np.arange(1, 3.1, 1).tolist()
+            col_name = "Error Prediksi"
+            tooltip_label = "Error Prediksi: "
+            bins = err_bin_edges.tolist()
 
         map = folium.Map(location=(-6.9212, 107.6157), zoom_start=8, tiles="CartoDB positron")
 
@@ -151,7 +171,7 @@ def show_predict_map(pred_result_df, gp_result_df):
             fill_color=fill_color,
             legend_name=str(data_to_show + " berdasarkan model " + model_to_use),
         )
-        choropleth.geojson.add_to(map)
+        choropleth.add_to(map)
 
         yield_df = yield_df.set_index('Kabupaten')
         for feature in choropleth.geojson.data['features']:
@@ -164,7 +184,7 @@ def show_predict_map(pred_result_df, gp_result_df):
             folium.features.GeoJsonTooltip(['Kabupaten', col_name], labels=False)
         )
 
-        st_folium(map, width=750, height=450, returned_objects=[])
+        folium_static(map, width=750, height=450)
 
 def main():
     current = os.path.dirname(os.path.realpath(__file__))
@@ -200,21 +220,17 @@ def main():
 
     show_model_evaluation(real_values, pred_values, gp_values)
 
-    pred_err = pred_values - real_values
-    pred_err_p = np.abs(pred_err) / real_values
-    gp_err = gp_values - real_values
-    gp_err_p = np.abs(gp_err) / real_values
+    pred_err = np.abs(pred_values - real_values)
+    gp_err = np.abs(gp_values - real_values)
 
     pred_dict = values_to_dict(indices, pred_values)
     pred_err_dict = values_to_dict(indices, pred_err)
-    pred_err_p_dict = values_to_dict(indices, pred_err_p)
     gp_dict = values_to_dict(indices, gp_values)
     gp_err_dict = values_to_dict(indices, gp_err)
-    gp_err_p_dict = values_to_dict(indices, gp_err_p)
     real_dict = values_to_dict(indices, real_values)
 
-    pred_result_df = get_real_pred_df(code_regency_map, real_dict, pred_dict, pred_err_dict, pred_err_p_dict)
-    gp_result_df = get_real_pred_df(code_regency_map, real_dict, gp_dict, gp_err_dict, gp_err_p_dict)
+    pred_result_df = get_real_pred_df(code_regency_map, real_dict, pred_dict, pred_err_dict)
+    gp_result_df = get_real_pred_df(code_regency_map, real_dict, gp_dict, gp_err_dict)
     show_predict_map(pred_result_df, gp_result_df)
 
 if __name__ == "__main__":
