@@ -37,6 +37,7 @@ def dataframe_tab(yield_df):
             ),
         },
         hide_index=True,
+        use_container_width=True,
     )
 
 def histogram_tab(yield_df):
@@ -95,9 +96,9 @@ def map_tab(yield_df):
         columns=("Kabupaten", "Padi"),
         key_on="feature.properties.KAB_KOTA",
         line_opacity=0.8,
+        fill_opacity=0.8,
         highlight=True,
         fill_color="Greens",
-        
     )
     choropleth.geojson.add_to(map)
 
@@ -111,7 +112,7 @@ def map_tab(yield_df):
         folium.features.GeoJsonTooltip(['Kabupaten', 'Padi'], labels=False)
     )
 
-    st_map = st_folium(map, width=750, height=450)
+    st_folium(map, width=750, height=450, returned_objects=[])
 
 def main():
     current = os.path.dirname(os.path.realpath(__file__))

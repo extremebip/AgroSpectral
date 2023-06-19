@@ -5,3 +5,4 @@ folium
 streamlit
 streamlit_folium
 plotly
+torch
