@@ -1,4 +1,3 @@
-PIL
 matplotlib
 seaborn
 pandas
