@@ -193,7 +193,7 @@ def main():
 
     st.set_page_config(
         page_title="Hasil Analisis",
-        page_icon="📈",
+        page_icon="✅",
     )
 
     st.markdown(
