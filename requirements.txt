@@ -6,3 +6,4 @@ streamlit
 streamlit_folium
 plotly
 torch
+scipy
