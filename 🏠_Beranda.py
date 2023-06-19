@@ -25,7 +25,7 @@ def main():
 
     with col1:
         img1 = Image.open('assets/crop.jpg')
-        st.image(img1, width=450)
+        st.image(img1, use_column_width=True)
 
     with col2:
         st.write(
@@ -53,7 +53,7 @@ def main():
 
     with col4:
         img2 = Image.open('assets/analysis.png')
-        st.image(img2, width=450)
+        st.image(img2, use_column_width=True)
 
 if __name__ == "__main__":
     main()
