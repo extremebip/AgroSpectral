@@ -106,7 +106,7 @@ def show_predict_map(pred_result_df, gp_result_df):
         horizontal=True,
     )
 
-    tab1, tab2 = st.tabs(["Tabel", "Peta"])
+    tab1, tab2 = st.tabs(["Peta", "Tabel"])
 
     yield_pred = np.concatenate((pred_result_df['Prediksi'], gp_result_df['Prediksi']))
     pred_hist, pred_bin_edges = np.histogram(yield_pred, bins=6)
