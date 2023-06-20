@@ -41,43 +41,34 @@ def run_gp_model(model, sigma=1, r_loc=0.5, r_year=1.5, sigma_e=0.32, sigma_b=0.
   return gp_pred.squeeze(1)
 
 def get_gp_parameters():
-    sigma = 4.98057109586427
-    r_loc = 0.0149434503570452
-    r_year = 2.98888665618427
-    sigma_e = 0.0195617243986127
-    sigma_b = 0.533659083232355
+    sigma = 3.79340289637376
+    r_loc = 0.0693538414148434
+    r_year = 1.96155650006077
+    sigma_e = 0.207275446292273
+    sigma_b = 0.0036492294722733
     return sigma, r_loc, r_year, sigma_e, sigma_b
 
 def show_model_evaluation(real_values, pred_values, gp_values):
-    st.markdown("## Evaluasi Model")
+    st.write("## Evaluasi Model")
 
-    col1, col2, col3 = st.columns(3)
-    col4, col5 = st.columns(2)
-    col6, col7 = st.columns(2)
+    with st.expander("Metrik yang digunakan"):
+        st.write(
+           """
+            - Root Mean Square Error (RMSE): Akar dari rata-rata kuadrat perbedaan nilai antara hasil prediksi dengan data sebenarnya.
+            Semakin rendah nilai ini, maka semakin baik model tersebut.
 
-    total_real = np.sum(real_values)
-    total_pred = np.sum(pred_values)
-    pred_err = abs(total_real - total_pred)
-    pred_err_percent = (pred_err / total_real) * 100
+              $$ RMSE = \sqrt{\dfrac{\sum_{i=1}^{N}(y_i - \hat{y}_i)^2}{N}} $$
 
-    total_gp = np.sum(gp_values)
-    gp_err = abs(total_real - total_gp)
-    gp_err_percent = (gp_err / total_real) * 100
+            - Mean Absolute Error (MAE): Rata-rata dari nilai absolut perbedaan nilai antara hasil prediksi dengan data sebenarnya. 
+            Semakin rendah nilai ini, maka semakin baik model tersebut.
 
-    with col2:
-        st.metric("Total Produksi Padi (2020)", '{:.2f}'.format(total_real))
-    with col4:
-        st.metric("Prediksi Total Produksi Padi (Tanpa GP)", '{:.2f}'.format(total_pred))
-    with col5:
-        st.metric("Prediksi Total Produksi Padi (Dengan GP)", '{:.2f}'.format(total_gp))
-    with col6:
-        st.metric("Persentase Error Prediksi (Tanpa GP)", '{:.2f}%'.format(pred_err_percent))
-    with col7:
-        st.metric(
-            "Persentase Error Prediksi (Dengan GP)",
-            '{:.2f}%'.format(gp_err_percent),
-            '{:.2f}%'.format(gp_err_percent - pred_err_percent),
-            "inverse"
+              $$ MAE = \dfrac{\sum_{i=1}^{N}|y_i - \hat{y}_i|}{N} $$
+
+            - Mean Absolute Percentage Error (MAPE): Rata-rata dari nilai absolut perbedaan nilai antara hasil prediksi dengan data sebenarnya lalu dibagi dengan nilai sebenarnya.
+            Semakin rendah nilai ini, maka semakin baik model tersebut.
+
+              $$ MAPE = \dfrac{100\%}{N} \sum_{i=1}^{N} | \dfrac{y_i - \hat{y}_i}{y_i} | $$
+           """
         )
 
     rmse, mae, mape = calc_metrics(real_values, pred_values)
@@ -91,6 +82,13 @@ def show_model_evaluation(real_values, pred_values, gp_values):
     metric_df['MAPE'] = metric_df['MAPE'].transform(lambda x: "{:.2f}%".format(x))
 
     st.dataframe(metric_df, use_container_width=True, hide_index=True)
+
+    st.write(
+        """
+        **Kesimpulan**: Berdasarkan ketiga metrik di atas, kita dapat menyimpulkan bahwa
+        model CNN yang menggunakan GP lebih baik dibandingkan model yang menggunakan CNN saja.
+        """
+    )
 
 def values_to_dict(indices, values):
   dict_result = {}
