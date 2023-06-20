@@ -146,21 +146,16 @@ def main():
 
     filtered_yields = filter_yield_df(yield_df, selected_regencies, selected_years)
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Tabel", "Histogram", "Bar Chart", "Line Chart", "Peta"])
+    tab1, tab2, tab3 = st.tabs(["Bar Chart", "Peta", "Tabel"])
+
     with tab1:
-        dataframe_tab(filtered_yields)
-
-    with tab2:
-        histogram_tab(filtered_yields)
-
-    with tab3:
         barchart_tab(filtered_yields)
 
-    with tab4:
-        linechart_tab(filtered_yields)
-
-    with tab5:
+    with tab2:
         map_tab(filtered_yields)
+
+    with tab3:
+        dataframe_tab(filtered_yields)
 
 if __name__ == "__main__":
     main()
