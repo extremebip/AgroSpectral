@@ -120,22 +120,6 @@ def show_predict_map(pred_result_df, gp_result_df):
         yield_df = gp_result_df
 
     with tab1:
-        st.dataframe(
-            yield_df,
-            column_config={
-                "Produksi": st.column_config.NumberColumn("Produksi Padi (Actual)"),
-                "Prediksi": st.column_config.NumberColumn(
-                    "Produksi Padi (Prediksi)",
-                ),
-                "Error Prediksi": st.column_config.NumberColumn(
-                    "Error Prediksi",
-                ),
-            },
-            use_container_width=True,
-            hide_index=True
-        )
-
-    with tab2:
         data_to_show = st.radio(
             "Data yang ditampilkan",
             ('Prediksi Padi', 'Error Prediksi'),
@@ -183,6 +167,22 @@ def show_predict_map(pred_result_df, gp_result_df):
         )
 
         folium_static(map, width=750, height=450)
+
+    with tab2:
+        st.dataframe(
+            yield_df,
+            column_config={
+                "Produksi": st.column_config.NumberColumn("Produksi Padi (Actual)"),
+                "Prediksi": st.column_config.NumberColumn(
+                    "Produksi Padi (Prediksi)",
+                ),
+                "Error Prediksi": st.column_config.NumberColumn(
+                    "Error Prediksi",
+                ),
+            },
+            use_container_width=True,
+            hide_index=True
+        )
 
 def main():
     current = os.path.dirname(os.path.realpath(__file__))
