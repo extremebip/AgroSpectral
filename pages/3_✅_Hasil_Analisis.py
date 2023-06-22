@@ -172,6 +172,7 @@ def show_predict_map(pred_result_df, gp_result_df):
         st.dataframe(
             yield_df,
             column_config={
+                "Kabupaten": st.column_config.TextColumn("Kabupaten"),
                 "Produksi": st.column_config.NumberColumn("Produksi Padi (Actual)"),
                 "Prediksi": st.column_config.NumberColumn(
                     "Produksi Padi (Prediksi)",
